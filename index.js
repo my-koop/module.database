@@ -5,11 +5,28 @@ var Module = (function () {
     }
     Module.prototype.init = function (moduleManager) {
         this.moduleManager = moduleManager;
+
         //app.get("")
+        var connectionInfo;
+        try  {
+            connectionInfo = require("dbConfig.json5");
+            this.connect(connectionInfo);
+        } catch (e) {
+            console.error("Unable to find Database configuration [dbConfig.json5]", e);
+        }
     };
 
-    Module.prototype.getConnection = function () {
-        return this.connection;
+    Module.prototype.getConnection = function (callback) {
+        var self = this;
+
+        // async call
+        setTimeout(function () {
+            if (self.connection) {
+                callback(null, self.connection);
+                return;
+            }
+            callback("connection unavailable", null);
+        }, 0);
     };
 
     Module.prototype.connect = function (dbConfig) {
@@ -59,7 +76,7 @@ var ModuleBridge = (function () {
     };
 
     ModuleBridge.prototype.onAllModulesLoaded = function (moduleManager) {
-        console.log("Hey hey im the inventory and im ready to rumble");
+        console.log("Hey hey im the database and im ready to rumble");
         this.getInstance().init(moduleManager);
     };
 

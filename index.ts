@@ -3,7 +3,7 @@ import mykoop = require("mykoop");
 import mysql = require("mysql");
 import mkdatabase = require("mykoop-database");
 
-class Module implements mkdatabase {
+class Module implements mkdatabase.Module {
   moduleManager: mykoop.ModuleManager;
   connection: mysql.IConnection;
   dbConfig: mysql.IConnectionConfig;
@@ -11,10 +11,25 @@ class Module implements mkdatabase {
   init(moduleManager: mykoop.ModuleManager){
     this.moduleManager = moduleManager;
     //app.get("")
+    var connectionInfo;
+    try{
+      connectionInfo = require("dbConfig.json5");
+      this.connect(connectionInfo);
+    } catch(e) {
+      console.error("Unable to find Database configuration [dbConfig.json5]", e);
+    }
   }
 
-  getConnection(): mysql.IConnection {
-    return this.connection;
+  getConnection(callback: mkdatabase.ConnectionCallback) {
+    var self = this;
+    // async call
+    setTimeout(function(){
+      if(self.connection){
+        callback(null,self.connection);
+        return;
+      }
+      callback("connection unavailable", null);
+    },0);
   }
 
   connect(dbConfig: mysql.IConnectionConfig): mysql.IConnection {
@@ -63,7 +78,7 @@ class ModuleBridge implements mykoop.IModuleBridge {
   }
 
   onAllModulesLoaded(moduleManager: mykoop.ModuleManager) {
-    console.log("Hey hey im the inventory and im ready to rumble");
+    console.log("Hey hey im the database and im ready to rumble");
     this.getInstance().init(moduleManager);
   }
 

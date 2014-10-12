@@ -18,5 +18,8 @@
   "homepage": "https://github.com/my-koop/module.database",
   "dependencies": {
     "mysql": "^2.5.2"
+  },
+  "peerDependencies": {
+    "json5": "^0.2.0"
   }
 }

@@ -13,11 +13,14 @@ declare module mysql {
 declare module "mykoop-database" {
   import mykoop = require("mykoop");
 
-  interface Module extends mykoop.IModule {
-    connect(dbConfig: mysql.IConnectionConfig): mysql.IConnection;
-    getConnection(): mysql.IConnection;
+  export interface ConnectionCallback{
+    (err: any, connection: mysql.IConnection) : void;
   }
 
-  export = Module;
+  export interface Module extends mykoop.IModule {
+    connect(dbConfig: mysql.IConnectionConfig): mysql.IConnection;
+    getConnection(callback: ConnectionCallback): void;
+  }
+
 }
 
