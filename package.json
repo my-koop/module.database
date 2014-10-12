@@ -16,4 +16,7 @@
     "url": "https://github.com/my-koop/module.inventory/issues"
   },
   "homepage": "https://github.com/my-koop/module.inventory",
+  "dependencies": {
+    "mysql": "^2.5.2"
+  }
 }
