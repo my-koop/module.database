@@ -19,7 +19,7 @@ var Module = (function () {
         }
 
         this.dbConfig = dbConfig;
-        this.createConnection();
+        return this.createConnection();
     };
 
     /**
@@ -28,24 +28,25 @@ var Module = (function () {
     Module.prototype.createConnection = function () {
         if (!this.dbConfig)
             return;
-
+        var self = this;
         this.connection = mysql.createConnection(this.dbConfig);
 
         this.connection.connect(function (err) {
             if (err) {
                 console.log('error when connecting to db:', err);
-                setTimeout(this.createConnection, 2000);
+                setTimeout(self.createConnection, 2000);
             }
         });
 
         this.connection.on('error', function (err) {
             console.log('db error', err);
             if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-                this.createConnection();
+                self.createConnection();
             } else {
                 throw err;
             }
         });
+        return this.connection;
     };
     return Module;
 })();

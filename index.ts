@@ -1,8 +1,9 @@
 /// <reference path="typings/tsd.d.ts" />
 import mykoop = require("mykoop");
 import mysql = require("mysql");
+import mkdatabase = require("mykoop-database");
 
-class Module implements mykoop.IModule {
+class Module implements mkdatabase {
   moduleManager: mykoop.ModuleManager;
   connection: mysql.IConnection;
   dbConfig: mysql.IConnectionConfig;
@@ -16,39 +17,40 @@ class Module implements mykoop.IModule {
     return this.connection;
   }
 
-  connect(dbConfig: mysql.IConnectionConfig) {
+  connect(dbConfig: mysql.IConnectionConfig): mysql.IConnection {
     if(!dbConfig) {
       console.error("Database connection config are required");
       return;
     }
 
     this.dbConfig = dbConfig;
-    this.createConnection();
+    return this.createConnection();
   }
 
   /**
    * Handling connection disconnects, as defined here: https://github.com/felixge/node-mysql
    */
-  private createConnection() {
+  private createConnection(): mysql.IConnection {
     if(!this.dbConfig) return;
-
+    var self = this;
     this.connection = mysql.createConnection(this.dbConfig);
 
     this.connection.connect(function (err) {
         if (err) {
             console.log('error when connecting to db:', err);
-            setTimeout(this.createConnection, 2000);
+            setTimeout(self.createConnection, 2000);
         }
     });
 
     this.connection.on('error', function (err) {
         console.log('db error', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-            this.createConnection();
+            self.createConnection();
         } else {
             throw err;
         }
     });
+    return this.connection;
   }
 }
 

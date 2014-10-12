@@ -1,5 +1,5 @@
 {
-  "name": "my-koop.inventory",
+  "name": "mykoop-database",
   "version": "0.0.1",
   "description": "Inventory module for My Koop responsible for item's definitions and management",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/my-koop/module.inventory.git"
+    "url": "https://github.com/my-koop/module.database.git"
   },
   "author": "",
   "license": "GNU GPL v2",
   "bugs": {
-    "url": "https://github.com/my-koop/module.inventory/issues"
+    "url": "https://github.com/my-koop/module.database/issues"
   },
-  "homepage": "https://github.com/my-koop/module.inventory",
+  "homepage": "https://github.com/my-koop/module.database",
   "dependencies": {
     "mysql": "^2.5.2"
   }

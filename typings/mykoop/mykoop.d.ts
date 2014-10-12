@@ -9,7 +9,7 @@ declare module "mykoop" {
 
   }
 
-  export interface ModuleManager {
+  export class ModuleManager {
     // Retrieves the instance of a module, can be null if unavailable
     get(moduleName: string): IModule;
   }
