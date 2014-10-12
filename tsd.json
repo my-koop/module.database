@@ -1,0 +1,12 @@
+{
+  "version": "v4",
+  "repo": "my-koop/type.definitions",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "mykoop/mykoop.d.ts": {
+      "commit": "2b92f62fffcf9f07feaa2bc430989f897b347132"
+    }
+  }
+}

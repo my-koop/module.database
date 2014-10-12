@@ -1,0 +1,19 @@
+{
+  "name": "my-koop.inventory",
+  "version": "0.0.1",
+  "description": "Inventory module for My Koop responsible for item's definitions and management",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/my-koop/module.inventory.git"
+  },
+  "author": "",
+  "license": "GNU GPL v2",
+  "bugs": {
+    "url": "https://github.com/my-koop/module.inventory/issues"
+  },
+  "homepage": "https://github.com/my-koop/module.inventory",
+}
