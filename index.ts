@@ -75,7 +75,7 @@ class ModuleBridge implements mykoop.IModuleBridge {
     return this.instance || (this.instance = new Module());
   }
 
-  onAllModulesLoaded(moduleManager: mykoop.ModuleManager) {
+  onAllModulesInitialized(moduleManager: mykoop.ModuleManager) {
     console.log("Hey hey im the database and im ready to rumble");
     this.getInstance().init(moduleManager);
   }

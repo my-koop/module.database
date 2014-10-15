@@ -76,7 +76,7 @@ var ModuleBridge = (function () {
         return this.instance || (this.instance = new Module());
     };
 
-    ModuleBridge.prototype.onAllModulesLoaded = function (moduleManager) {
+    ModuleBridge.prototype.onAllModulesInitialized = function (moduleManager) {
         console.log("Hey hey im the database and im ready to rumble");
         this.getInstance().init(moduleManager);
     };
