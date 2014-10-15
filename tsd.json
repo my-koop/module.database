@@ -8,5 +8,11 @@
     "mykoop/mykoop.d.ts": {
       "commit": "36eecd35b1eb613e2069143f310c4400391876d3"
     }
+  },
+  "owned": {
+    "mykoop-database": {}
+  },
+  "dependencies": {
+    "mykoop": {}
   }
 }
