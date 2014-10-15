@@ -1,7 +1,5 @@
 /// <reference path="typings/tsd.d.ts" />
-import mykoop = require("mykoop");
 import mysql = require("mysql");
-import mkdatabase = require("mykoop-database");
 
 class Module implements mkdatabase.Module {
   moduleManager: mykoop.ModuleManager;

@@ -1,3 +1,4 @@
+/// <reference path="typings/tsd.d.ts" />
 var mysql = require("mysql");
 
 var Module = (function () {
