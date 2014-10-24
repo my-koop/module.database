@@ -2,8 +2,9 @@
 import mysql = require("mysql");
 import utils = require("mykoop-utils");
 
+var CONNECTION_LIMIT_DEFAULT = 1;
+
 class Module implements mkdatabase.Module {
-  private static CONNECTION_LIMIT_DEFAULT = 1;
   moduleManager: mykoop.ModuleManager;
   pool: mysql.IPool = null;
   dbConfig: mysql.IConnectionConfig;
@@ -14,7 +15,7 @@ class Module implements mkdatabase.Module {
     try{
       connectionInfo = require("dbConfig.json5");
       if(!connectionInfo.connectionLimit) {
-        connectionInfo.connectionLimit = Module.CONNECTION_LIMIT_DEFAULT;
+        connectionInfo.connectionLimit = CONNECTION_LIMIT_DEFAULT;
       }
       this.connect(connectionInfo);
     } catch(e) {

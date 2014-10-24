@@ -2,6 +2,8 @@
 var mysql = require("mysql");
 var utils = require("mykoop-utils");
 
+var CONNECTION_LIMIT_DEFAULT = 1;
+
 var Module = (function () {
     function Module() {
         this.pool = null;
@@ -12,7 +14,7 @@ var Module = (function () {
         try  {
             connectionInfo = require("dbConfig.json5");
             if (!connectionInfo.connectionLimit) {
-                connectionInfo.connectionLimit = Module.CONNECTION_LIMIT_DEFAULT;
+                connectionInfo.connectionLimit = CONNECTION_LIMIT_DEFAULT;
             }
             this.connect(connectionInfo);
         } catch (e) {
@@ -68,7 +70,6 @@ var Module = (function () {
             console.log("DB error", err);
         });
     };
-    Module.CONNECTION_LIMIT_DEFAULT = 1;
     return Module;
 })();
 
