@@ -1,17 +1,21 @@
 /// <reference path="typings/tsd.d.ts" />
 import mysql = require("mysql");
+import utils = require("mykoop-utils");
 
 class Module implements mkdatabase.Module {
+  private static CONNECTION_LIMIT_DEFAULT = 1;
   moduleManager: mykoop.ModuleManager;
-  connection: mysql.IConnection;
+  pool: mysql.IPool = null;
   dbConfig: mysql.IConnectionConfig;
 
   init(moduleManager: mykoop.ModuleManager){
     this.moduleManager = moduleManager;
-    //app.get("")
     var connectionInfo;
     try{
       connectionInfo = require("dbConfig.json5");
+      if(!connectionInfo.connectionLimit) {
+        connectionInfo.connectionLimit = Module.CONNECTION_LIMIT_DEFAULT;
+      }
       this.connect(connectionInfo);
     } catch(e) {
       console.error("Unable to find Database configuration [dbConfig.json5]", e);
@@ -20,50 +24,54 @@ class Module implements mkdatabase.Module {
 
   getConnection(callback: mkdatabase.ConnectionCallback) {
     var self = this;
-    // async call
-    setTimeout(function(){
-      if(self.connection){
-        callback(null,self.connection);
-        return;
-      }
-      callback("connection unavailable", null);
-    },0);
+    var stack = utils.__DEV__ ? (<any>new Error()).stack : null;
+
+    if(self.pool) {
+      self.pool.getConnection(function (err, connection) {
+        var connectionReleased = false;
+
+        // In dev, making sure the connection is released
+        if(utils.__DEV__) {
+          setTimeout(function() {
+            if(!connectionReleased) {
+              console.warn(
+                "A connection was requested but still not released\n",
+                stack
+              );
+              connection.release();
+            }
+          }, 10000);
+        }
+        callback(err, connection, function() {
+          connectionReleased = true;
+          connection.release();
+        });
+
+      });
+      return;
+    }
+    callback(new Error("connection unavailable"), null, function(){} );
   }
 
-  connect(dbConfig: mysql.IConnectionConfig): mysql.IConnection {
+  connect(dbConfig: mysql.IConnectionConfig) {
     if(!dbConfig) {
       console.error("Database connection config are required");
       return;
     }
 
     this.dbConfig = dbConfig;
-    return this.createConnection();
-  }
-
-  /**
-   * Handling connection disconnects, as defined here: https://github.com/felixge/node-mysql
-   */
-  private createConnection(): mysql.IConnection {
-    if(!this.dbConfig) return;
-    var self = this;
-    this.connection = mysql.createConnection(this.dbConfig);
-
-    this.connection.connect(function (err) {
-        if (err) {
-            console.log('error when connecting to db:', err);
-            setTimeout(self.createConnection, 2000);
+    this.pool = mysql.createPool(this.dbConfig);
+    this.pool.on("connection", function(connection) {
+      console.log("New connection created ", connection.threadId);
+      connection.on("error", function(err) {
+        if(err.fatal) {
+          console.log("Fatal error on connection ", connection.threadId, err);
         }
+      });
     });
-
-    this.connection.on('error', function (err) {
-        console.log('db error', err);
-        if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-            self.createConnection();
-        } else {
-            throw err;
-        }
+    this.pool.on("error", function(err) {
+      console.log("DB error", err);
     });
-    return this.connection;
   }
 }
 
@@ -76,20 +84,11 @@ class ModuleBridge implements mykoop.IModuleBridge {
   }
 
   onAllModulesInitialized(moduleManager: mykoop.ModuleManager) {
-    console.log("Hey hey im the database and im ready to rumble");
     this.getInstance().init(moduleManager);
   }
 
   getModule() : mykoop.IModule {
     return this.getInstance();
-  }
-
-  getStyles(): string[] {
-    return null;
-  }
-
-  getReactComponents(): string[] {
-    return null;
   }
 }
 
