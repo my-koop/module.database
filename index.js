@@ -1,16 +1,21 @@
 /// <reference path="typings/tsd.d.ts" />
 var mysql = require("mysql");
+var utils = require("mykoop-utils");
+
+var CONNECTION_LIMIT_DEFAULT = 1;
 
 var Module = (function () {
     function Module() {
+        this.pool = null;
     }
     Module.prototype.init = function (moduleManager) {
         this.moduleManager = moduleManager;
-
-        //app.get("")
         var connectionInfo;
         try  {
             connectionInfo = require("dbConfig.json5");
+            if (!connectionInfo.connectionLimit) {
+                connectionInfo.connectionLimit = CONNECTION_LIMIT_DEFAULT;
+            }
             this.connect(connectionInfo);
         } catch (e) {
             console.error("Unable to find Database configuration [dbConfig.json5]", e);
@@ -19,15 +24,30 @@ var Module = (function () {
 
     Module.prototype.getConnection = function (callback) {
         var self = this;
+        var stack = utils.__DEV__ ? (new Error()).stack : null;
 
-        // async call
-        setTimeout(function () {
-            if (self.connection) {
-                callback(null, self.connection);
-                return;
-            }
-            callback("connection unavailable", null);
-        }, 0);
+        if (self.pool) {
+            self.pool.getConnection(function (err, connection) {
+                var connectionReleased = false;
+
+                // In dev, making sure the connection is released
+                if (utils.__DEV__) {
+                    setTimeout(function () {
+                        if (!connectionReleased) {
+                            console.warn("A connection was requested but still not released\n", stack);
+                            connection.release();
+                        }
+                    }, 10000);
+                }
+                callback(err, connection, function () {
+                    connectionReleased = true;
+                    connection.release();
+                });
+            });
+            return;
+        }
+        callback(new Error("connection unavailable"), null, function () {
+        });
     };
 
     Module.prototype.connect = function (dbConfig) {
@@ -37,34 +57,18 @@ var Module = (function () {
         }
 
         this.dbConfig = dbConfig;
-        return this.createConnection();
-    };
-
-    /**
-    * Handling connection disconnects, as defined here: https://github.com/felixge/node-mysql
-    */
-    Module.prototype.createConnection = function () {
-        if (!this.dbConfig)
-            return;
-        var self = this;
-        this.connection = mysql.createConnection(this.dbConfig);
-
-        this.connection.connect(function (err) {
-            if (err) {
-                console.log('error when connecting to db:', err);
-                setTimeout(self.createConnection, 2000);
-            }
+        this.pool = mysql.createPool(this.dbConfig);
+        this.pool.on("connection", function (connection) {
+            console.log("New connection created ", connection.threadId);
+            connection.on("error", function (err) {
+                if (err.fatal) {
+                    console.log("Fatal error on connection ", connection.threadId, err);
+                }
+            });
         });
-
-        this.connection.on('error', function (err) {
-            console.log('db error', err);
-            if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-                self.createConnection();
-            } else {
-                throw err;
-            }
+        this.pool.on("error", function (err) {
+            console.log("DB error", err);
         });
-        return this.connection;
     };
     return Module;
 })();
@@ -77,20 +81,11 @@ var ModuleBridge = (function () {
     };
 
     ModuleBridge.prototype.onAllModulesInitialized = function (moduleManager) {
-        console.log("Hey hey im the database and im ready to rumble");
         this.getInstance().init(moduleManager);
     };
 
     ModuleBridge.prototype.getModule = function () {
         return this.getInstance();
-    };
-
-    ModuleBridge.prototype.getStyles = function () {
-        return null;
-    };
-
-    ModuleBridge.prototype.getReactComponents = function () {
-        return null;
     };
     return ModuleBridge;
 })();

@@ -17,11 +17,10 @@ declare module mykoop {
 declare module mkdatabase {
 
   export interface ConnectionCallback{
-    (err: any, connection: mysql.IConnection) : void;
+    (err: any, connection: mysql.IConnection, doneCallback: () => void) : void;
   }
 
   export interface Module extends mykoop.IModule {
-    connect(dbConfig: mysql.IConnectionConfig): mysql.IConnection;
     getConnection(callback: ConnectionCallback): void;
   }
 
