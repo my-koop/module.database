@@ -1,5 +1,9 @@
 {
   "name": "mykoop-database",
+  "role": "database",
+  "mykoop": {
+    "dependencies": {}
+  },
   "version": "0.0.1",
   "description": "Inventory module for My Koop responsible for item's definitions and management",
   "main": "index.js",
