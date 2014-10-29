@@ -4,13 +4,11 @@ import utils = require("mykoop-utils");
 
 var CONNECTION_LIMIT_DEFAULT = 1;
 
-class Module implements mkdatabase.Module {
-  moduleManager: mykoop.ModuleManager;
+class Module extends utils.BaseModule implements mkdatabase.Module {
   pool: mysql.IPool = null;
   dbConfig: mysql.IConnectionConfig;
 
-  init(moduleManager: mykoop.ModuleManager){
-    this.moduleManager = moduleManager;
+  init() {
     var connectionInfo;
     try{
       connectionInfo = require("dbConfig.json5");
@@ -25,7 +23,7 @@ class Module implements mkdatabase.Module {
 
   getConnection(callback: mkdatabase.ConnectionCallback) {
     var self = this;
-    var stack = utils.__DEV__ ? (<any>new Error()).stack : null;
+    var stack = utils.__DEV__ ? new Error().stack : null;
 
     if(self.pool) {
       self.pool.getConnection(function (err, connection) {
@@ -85,7 +83,7 @@ class ModuleBridge implements mykoop.IModuleBridge {
   }
 
   onAllModulesInitialized(moduleManager: mykoop.ModuleManager) {
-    this.getInstance().init(moduleManager);
+    this.getInstance().init();
   }
 
   getModule() : mykoop.IModule {

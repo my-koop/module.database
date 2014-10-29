@@ -1,15 +1,22 @@
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
 /// <reference path="typings/tsd.d.ts" />
 var mysql = require("mysql");
 var utils = require("mykoop-utils");
 
 var CONNECTION_LIMIT_DEFAULT = 1;
 
-var Module = (function () {
+var Module = (function (_super) {
+    __extends(Module, _super);
     function Module() {
+        _super.apply(this, arguments);
         this.pool = null;
     }
-    Module.prototype.init = function (moduleManager) {
-        this.moduleManager = moduleManager;
+    Module.prototype.init = function () {
         var connectionInfo;
         try  {
             connectionInfo = require("dbConfig.json5");
@@ -24,7 +31,7 @@ var Module = (function () {
 
     Module.prototype.getConnection = function (callback) {
         var self = this;
-        var stack = utils.__DEV__ ? (new Error()).stack : null;
+        var stack = utils.__DEV__ ? new Error().stack : null;
 
         if (self.pool) {
             self.pool.getConnection(function (err, connection) {
@@ -71,7 +78,7 @@ var Module = (function () {
         });
     };
     return Module;
-})();
+})(utils.BaseModule);
 
 var ModuleBridge = (function () {
     function ModuleBridge() {
@@ -81,7 +88,7 @@ var ModuleBridge = (function () {
     };
 
     ModuleBridge.prototype.onAllModulesInitialized = function (moduleManager) {
-        this.getInstance().init(moduleManager);
+        this.getInstance().init();
     };
 
     ModuleBridge.prototype.getModule = function () {
