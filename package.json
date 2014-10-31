@@ -4,7 +4,7 @@
   "mykoop": {
     "dependencies": {}
   },
-  "version": "1.0.0-alpha",
+  "version": "1.0.0-beta",
   "description": "Inventory module for My Koop responsible for item's definitions and management",
   "main": "index.js",
   "scripts": {
