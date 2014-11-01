@@ -38,7 +38,7 @@ var Module = (function (_super) {
                 var connectionReleased = false;
 
                 // In dev, making sure the connection is released
-                if (utils.__DEV__) {
+                if (utils.__DEV__ && !err) {
                     setTimeout(function () {
                         if (!connectionReleased) {
                             console.warn("A connection was requested but still not released\n", stack);
@@ -48,7 +48,8 @@ var Module = (function (_super) {
                 }
                 callback(err, connection, function () {
                     connectionReleased = true;
-                    connection.release();
+                    if (!err)
+                        connection.release();
                 });
             });
             return;

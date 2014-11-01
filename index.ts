@@ -30,7 +30,7 @@ class Module extends utils.BaseModule implements mkdatabase.Module {
         var connectionReleased = false;
 
         // In dev, making sure the connection is released
-        if(utils.__DEV__) {
+        if(utils.__DEV__ && !err) {
           setTimeout(function() {
             if(!connectionReleased) {
               console.warn(
@@ -43,7 +43,7 @@ class Module extends utils.BaseModule implements mkdatabase.Module {
         }
         callback(err, connection, function() {
           connectionReleased = true;
-          connection.release();
+          if(!err) connection.release();
         });
 
       });
