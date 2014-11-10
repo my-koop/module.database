@@ -37,11 +37,13 @@ class Module extends utils.BaseModule implements mkdatabase.Module {
                 "A connection was requested but still not released\n",
                 stack
               );
+              connectionReleased = true;
               connection.release();
             }
           }, 10000);
         }
         callback(err, connection, function() {
+          if(connectionReleased) return;
           connectionReleased = true;
           if(!err) connection.release();
         });
