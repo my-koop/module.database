@@ -4,7 +4,7 @@
   "mykoop": {
     "dependencies": {}
   },
-  "version": "1.0.0-beta",
+  "version": "1.0.0-rc",
   "description": "Inventory module for My Koop responsible for item's definitions and management",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/my-koop/module.database",
   "dependencies": {
-    "mykoop-utils": "git://github.com/my-koop/module.utils#v1.0.0-beta",
+    "mykoop-utils": "git://github.com/my-koop/module.utils#rc",
     "mysql": "^2.5.2"
   }
 }
