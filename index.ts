@@ -2,7 +2,7 @@
 import mysql = require("mysql");
 import utils = require("mykoop-utils");
 
-var CONNECTION_LIMIT_DEFAULT = 1;
+var CONNECTION_LIMIT_DEFAULT = 4;
 
 class Module extends utils.BaseModule implements mkdatabase.Module {
   pool: mysql.IPool = null;

@@ -7,9 +7,7 @@ var __extends = this.__extends || function (d, b) {
 /// <reference path="typings/tsd.d.ts" />
 var mysql = require("mysql");
 var utils = require("mykoop-utils");
-
-var CONNECTION_LIMIT_DEFAULT = 1;
-
+var CONNECTION_LIMIT_DEFAULT = 4;
 var Module = (function (_super) {
     __extends(Module, _super);
     function Module() {
@@ -18,25 +16,23 @@ var Module = (function (_super) {
     }
     Module.prototype.init = function () {
         var connectionInfo;
-        try  {
+        try {
             connectionInfo = require("dbConfig.json5");
             if (!connectionInfo.connectionLimit) {
                 connectionInfo.connectionLimit = CONNECTION_LIMIT_DEFAULT;
             }
             this.connect(connectionInfo);
-        } catch (e) {
+        }
+        catch (e) {
             console.error("Unable to find Database configuration [dbConfig.json5]", e);
         }
     };
-
     Module.prototype.getConnection = function (callback) {
         var self = this;
         var stack = utils.__DEV__ ? new Error().stack : null;
-
         if (self.pool) {
             self.pool.getConnection(function (err, connection) {
                 var connectionReleased = false;
-
                 // In dev, making sure the connection is released
                 if (utils.__DEV__ && !err) {
                     setTimeout(function () {
@@ -60,13 +56,11 @@ var Module = (function (_super) {
         callback(new Error("connection unavailable"), null, function () {
         });
     };
-
     Module.prototype.connect = function (dbConfig) {
         if (!dbConfig) {
             console.error("Database connection config are required");
             return;
         }
-
         this.dbConfig = dbConfig;
         this.pool = mysql.createPool(this.dbConfig);
         this.pool.on("connection", function (connection) {
@@ -83,23 +77,19 @@ var Module = (function (_super) {
     };
     return Module;
 })(utils.BaseModule);
-
 var ModuleBridge = (function () {
     function ModuleBridge() {
     }
     ModuleBridge.prototype.getInstance = function () {
         return this.instance || (this.instance = new Module());
     };
-
     ModuleBridge.prototype.onAllModulesInitialized = function (moduleManager) {
         this.getInstance().init();
     };
-
     ModuleBridge.prototype.getModule = function () {
         return this.getInstance();
     };
     return ModuleBridge;
 })();
-
 var bridge = new ModuleBridge();
 module.exports = bridge;
