@@ -7,6 +7,9 @@
   "installed": {
     "mykoop/mykoop.d.ts": {
       "commit": "36eecd35b1eb613e2069143f310c4400391876d3"
+    },
+    "mykoop-logger/mykoop-logger.d.ts": {
+      "commit": "c4e024753d4a3f168ef10b2ebb7282ae41659589"
     }
   },
   "owned": {

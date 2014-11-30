@@ -7,6 +7,7 @@ var __extends = this.__extends || function (d, b) {
 /// <reference path="typings/tsd.d.ts" />
 var mysql = require("mysql");
 var utils = require("mykoop-utils");
+var logger = utils.getLogger(module);
 var CONNECTION_LIMIT_DEFAULT = 4;
 var Module = (function (_super) {
     __extends(Module, _super);
@@ -22,9 +23,16 @@ var Module = (function (_super) {
                 connectionInfo.connectionLimit = CONNECTION_LIMIT_DEFAULT;
             }
             this.connect(connectionInfo);
+            // Ping the connection to see if it's alive at bootstrap
+            this.getConnection(function (err, connection, cleanup) {
+                if (err) {
+                    logger.error(err);
+                }
+                cleanup();
+            });
         }
         catch (e) {
-            console.error("Unable to find Database configuration [dbConfig.json5]", e);
+            logger.error("Unable to find Database configuration [dbConfig.json5]", e);
         }
     };
     Module.prototype.getConnection = function (callback) {
@@ -37,7 +45,7 @@ var Module = (function (_super) {
                 if (utils.__DEV__ && !err) {
                     setTimeout(function () {
                         if (!connectionReleased) {
-                            console.warn("A connection was requested but still not released\n", stack);
+                            logger.warn("A connection was requested but still not released\n", stack);
                             connectionReleased = true;
                             connection.release();
                         }
@@ -64,15 +72,15 @@ var Module = (function (_super) {
         this.dbConfig = dbConfig;
         this.pool = mysql.createPool(this.dbConfig);
         this.pool.on("connection", function (connection) {
-            console.log("New connection created ", connection.threadId);
+            logger.verbose("New connection created ", connection.threadId);
             connection.on("error", function (err) {
                 if (err.fatal) {
-                    console.log("Fatal error on connection ", connection.threadId, err);
+                    logger.verbose("Fatal error on connection ", connection.threadId, err);
                 }
             });
         });
         this.pool.on("error", function (err) {
-            console.log("DB error", err);
+            logger.error("DB error", err);
         });
     };
     return Module;

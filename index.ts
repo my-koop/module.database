@@ -1,6 +1,7 @@
 /// <reference path="typings/tsd.d.ts" />
 import mysql = require("mysql");
 import utils = require("mykoop-utils");
+var logger = utils.getLogger(module);
 
 var CONNECTION_LIMIT_DEFAULT = 4;
 
@@ -16,8 +17,15 @@ class Module extends utils.BaseModule implements mkdatabase.Module {
         connectionInfo.connectionLimit = CONNECTION_LIMIT_DEFAULT;
       }
       this.connect(connectionInfo);
+      // Ping the connection to see if it's alive at bootstrap
+      this.getConnection(function(err, connection, cleanup) {
+        if(err) {
+          logger.error(err);
+        }
+        cleanup();
+      });
     } catch(e) {
-      console.error("Unable to find Database configuration [dbConfig.json5]", e);
+      logger.error("Unable to find Database configuration [dbConfig.json5]", e);
     }
   }
 
@@ -33,7 +41,7 @@ class Module extends utils.BaseModule implements mkdatabase.Module {
         if(utils.__DEV__ && !err) {
           setTimeout(function() {
             if(!connectionReleased) {
-              console.warn(
+              logger.warn(
                 "A connection was requested but still not released\n",
                 stack
               );
@@ -63,15 +71,15 @@ class Module extends utils.BaseModule implements mkdatabase.Module {
     this.dbConfig = dbConfig;
     this.pool = mysql.createPool(this.dbConfig);
     this.pool.on("connection", function(connection) {
-      console.log("New connection created ", connection.threadId);
+      logger.verbose("New connection created ", connection.threadId);
       connection.on("error", function(err) {
         if(err.fatal) {
-          console.log("Fatal error on connection ", connection.threadId, err);
+          logger.verbose("Fatal error on connection ", connection.threadId, err);
         }
       });
     });
     this.pool.on("error", function(err) {
-      console.log("DB error", err);
+      logger.error("DB error", err);
     });
   }
 }

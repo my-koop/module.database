@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/my-koop/module.database",
   "dependencies": {
+    "mykoop-logger": "git://github.com/my-koop/module.logger",
     "mykoop-utils": "git://github.com/my-koop/module.utils#rc",
     "mysql": "^2.5.2"
   }
