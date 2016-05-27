@@ -8,6 +8,7 @@
   "description": "Inventory module for My Koop responsible for item's definitions and management",
   "main": "index.js",
   "scripts": {
+    "build": "tsc --module commonJS --target ES5 index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,6 +24,10 @@
   "dependencies": {
     "mykoop-logger": "git://github.com/my-koop/module.logger",
     "mykoop-utils": "git://github.com/my-koop/module.utils",
-    "mysql": "^2.5.2"
+    "mysql": "^2.5.2",
+    "node-query": "github:alibaba/nquery"
+  },
+  "devDependencies": {
+    "typescript": "1.3.0"
   }
 }
