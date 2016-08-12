@@ -1,9 +1,137 @@
 /// <reference path="typings/tsd.d.ts" />
 import mysql = require("mysql");
 import utils = require("mykoop-utils");
+var parse = require('node-query').parse;
 var logger = utils.getLogger(module);
 
 var CONNECTION_LIMIT_DEFAULT = 4;
+
+var nextId = 1;
+var memoryDB = {
+  user: [{
+    id: "admin",
+    email: "admin@admin.com",
+    firstname: "admin",
+    lastname: "admin",
+    // pwd: 123
+    pwdhash: "g53JxtTbv8V7ez5W1s/KXoc38H+Z0GuiSoaFN0rsntRjYXw0pZxtK4x9IywssEX8JFP0sqTQxHs4qV39JqU/h9eQ30bNVpmAtP8NJD3RPIRpaVxC990dX9lHMg/WdZc9xehAF87lo1EBVUXwu8KPnYnUjiDyclaCMrJridfEE1Q=",
+    salt: "scd5PuSkWVl6E1xpR/8vsBjd3NZroEUuwzZnpoPr278ZzR+w5KF6DmE8jokYdewQblvfSsLPKzUp0lyVH+TEKoxT+z/s2h654oVtXN14mBCpqef5JYsGuLohNohCsX97nqV31GdgSI0XD7dq1CVWe09U8nZdmfXr9QVcM5RB0Kw=",
+    perms: JSON.stringify({
+      user: {
+        activation: true,
+        profile: {
+          view: true,
+          edit: true,
+          password: true,
+          permissions: {
+            view: true,
+            edit: true
+          }
+        },
+        notes: {
+          view: true,
+          create: true
+        },
+
+        // Permission masks.
+        permissions: {
+          create: true,
+          read: true,
+          update: true,
+          delete: true,
+          users: {
+            view: true,
+            add: true,
+            remove: true
+          }
+        }
+      }
+    })
+  }]
+};
+function processInMemoryQuery(ast) {
+  var rows: any = [];
+  switch(ast.type) {
+    case "select":
+      var tableName = ast.from[0].table;
+      var table = memoryDB[tableName];
+      rows = [];
+      if (table) {
+        switch(ast.where.operator) {
+          case "=":
+            rows = table.filter(row => row[ast.where.left.column] == ast.where.right.value)
+            break;
+        }
+      }
+      return rows;
+
+    case "insert":
+      var tableName = ast.table;
+      memoryDB[tableName] = memoryDB[tableName] || {};
+      var table = memoryDB[tableName];
+      var newElem = ast.set.reduce((newElem, col) => {
+        newElem[col.column] = col.value.value;
+        return newElem;
+      }, {});
+      var id = nextId++;
+      newElem.id = id;
+      table.push(newElem);
+      rows = [newElem];
+      rows.insertId = id;
+      return rows;
+    default:
+      throw new Error("todo");
+  }
+}
+
+function getInMemoryConnection(callback: mkdatabase.ConnectionCallback) {
+  var connection: mysql.IConnection = {
+    beginTransaction: function(){},
+    changeUser: function(){},
+    commit: function(){},
+    config: null,
+    connect: function() { },
+    destroy: function() { },
+    end: function() { },
+    escape: mysql.escape,
+    escapeId: function() { return ""; },
+    format: mysql.format,
+    on: function() { return connection; },
+    pause: function() { },
+    query: function(sql, values?, callback?) {
+      if (!callback) {
+        callback = values;
+        values = undefined;
+      }
+      if (!callback) {
+        callback = function(){}
+      }
+      try {
+        var queryStr = mysql.format(sql, values);
+        logger.info(queryStr);
+        var ast = parse(queryStr);
+        logger.info(ast);
+        var res: any = processInMemoryQuery(ast);
+        res.fieldCount = 0;
+        res.affectedRows = res.length;
+        res.message = "";
+        res.serverStatus = 200;
+        res.warningCount = 0;
+        res.changedRows = res.changedRows || 0;
+        logger.info(JSON.stringify(res));
+        callback(null, res);
+      } catch (e) {
+        callback(e);
+      }
+      return null;
+    },
+    release: function() { },
+    resume: function() { },
+    rollback: function() { },
+    threadId: 0
+  };
+  callback(null, connection, function() { });
+}
 
 class Module extends utils.BaseModule implements mkdatabase.Module {
   pool: mysql.IPool = null;
@@ -26,6 +154,8 @@ class Module extends utils.BaseModule implements mkdatabase.Module {
       });
     } catch(e) {
       logger.error("Unable to find Database configuration [dbConfig.json5]", e);
+      logger.info("Fallback to in memory database");
+      this.getConnection = getInMemoryConnection;
     }
   }
 
