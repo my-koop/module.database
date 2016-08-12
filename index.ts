@@ -17,33 +17,89 @@ var memoryDB = {
     pwdhash: "g53JxtTbv8V7ez5W1s/KXoc38H+Z0GuiSoaFN0rsntRjYXw0pZxtK4x9IywssEX8JFP0sqTQxHs4qV39JqU/h9eQ30bNVpmAtP8NJD3RPIRpaVxC990dX9lHMg/WdZc9xehAF87lo1EBVUXwu8KPnYnUjiDyclaCMrJridfEE1Q=",
     salt: "scd5PuSkWVl6E1xpR/8vsBjd3NZroEUuwzZnpoPr278ZzR+w5KF6DmE8jokYdewQblvfSsLPKzUp0lyVH+TEKoxT+z/s2h654oVtXN14mBCpqef5JYsGuLohNohCsX97nqV31GdgSI0XD7dq1CVWe09U8nZdmfXr9QVcM5RB0Kw=",
     perms: JSON.stringify({
-      user: {
-        activation: true,
-        profile: {
-          view: true,
-          edit: true,
-          password: true,
-          permissions: {
-            view: true,
-            edit: true
+      "website": {
+        "settings": true
+      },
+      "events": {
+        "create": true,
+        "view": true,
+        "update": true,
+        "delete": true,
+        "control": true,
+        "cancel": true,
+        "register": true,
+        "notes": {
+          "view": true,
+          "create": true
+        },
+        "users": {
+          "view": true,
+          "add": true,
+          "remove": true
+        }
+      },
+      "inventory": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true
+      },
+      "mailinglists": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true,
+        "send": true,
+        "users": {
+          "view": true,
+          "add": true,
+          "remove": true
+        }
+      },
+      "membership": {
+        "view": true,
+        "edit": true
+      },
+      "invoices": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true,
+        "close": true,
+        "reopen": true,
+        "reports": true
+      },
+      "user": {
+        "activation": true,
+        "profile": {
+          "view": true,
+          "edit": true,
+          "password": true,
+          "permissions": {
+            "view": true,
+            "edit": true
           }
         },
-        notes: {
-          view: true,
-          create: true
+        "notes": {
+          "view": true,
+          "create": true
         },
-
-        // Permission masks.
-        permissions: {
-          create: true,
-          read: true,
-          update: true,
-          delete: true,
-          users: {
-            view: true,
-            add: true,
-            remove: true
+        "permissions": {
+          "create": true,
+          "read": true,
+          "update": true,
+          "delete": true,
+          "users": {
+            "view": true,
+            "add": true,
+            "remove": true
           }
+        }
+      },
+      "volunteering": {
+        "hours": {
+          "enter": true,
+          "report": true
         }
       }
     })
@@ -118,7 +174,7 @@ function getInMemoryConnection(callback: mkdatabase.ConnectionCallback) {
         res.serverStatus = 200;
         res.warningCount = 0;
         res.changedRows = res.changedRows || 0;
-        logger.info(JSON.stringify(res));
+        //logger.info(JSON.stringify(res));
         callback(null, res);
       } catch (e) {
         callback(e);
